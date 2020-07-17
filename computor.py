@@ -57,7 +57,9 @@ def fill_terms(matches):
 				coef = 1
 			else:
 				coef = float(match[1])
+				coef = int(coef) if coef.is_integer() else coef
 			deg = float(match[2])
+			deg = int(deg) if deg.is_integer() else deg
 		t = Term(coef, deg)
 		terms.append(t)
 	return terms
@@ -71,6 +73,26 @@ def is_matches_valid_format(matches):
 		# if match[1] == '' or match[2] == '' and match[3] != '0'
 			# return False
 	return True
+
+def print_equation_side(equ):
+	length = len(equ)
+	for i in range(length):
+		if i == 0:
+			if equ[i].coef == 0:
+				print("0", end = " ")
+			else:
+				print("{} * X^{}".format(equ[i].coef, equ[i].deg), end = " ")
+		else:
+			if equ[i].coef == 0:
+				print("+ 0", end = " ")
+			else:
+				print("{} {} * X^{}".format('-' if equ[i].coef < 0 else '+', abs(equ[i].coef), equ[i].deg), end = " ")
+
+def print_equation(leftside, rightside):
+	print_equation_side(leftside)
+	print("=", end = " ")
+	print_equation_side(rightside)
+	print("")
 
 error_usage = "Usage: computor.py [EQUATION STRING]"
 error_format = "Error: Equation not well formated"
@@ -98,10 +120,13 @@ else:
 	put_error(error_format)
 	exit(0)
 
+print('Reduced form:', end =" ")
+print_equation(leftside, rightside)
+# print_degree(leftside, rightside)
+
 print('leftside')
 for term in leftside:
 	print(term.coef, '^', term.deg)
-
 
 print('rightside')
 for term in rightside:
