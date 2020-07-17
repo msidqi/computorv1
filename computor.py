@@ -3,7 +3,7 @@ import sys
 import math
 
 class Term:
-	def __init__(self, degee, coefficient):
+	def __init__(self, coefficient, degree):
 		self.deg = degree
 		self.coef = coefficient
 
@@ -43,13 +43,34 @@ def solve_poly2(a, b, c):
 		(-b - squareDisc) / (2 * a)
 		]
 
-
 def put_error(message):
 	print(message, file = sys.stderr)
 
-def check_equation_format(equation):
-	len = len(equation)
-	# if (len < 3 || )
+def fill_terms(matches):
+	terms = []
+	for match in matches:
+		if match[3] == '0':
+			coef = 0
+			deg = 1
+		else:
+			if match[1] == '' and match[2] != '':
+				coef = 1
+			else:
+				coef = float(match[1])
+			deg = float(match[2])
+		t = Term(coef, deg)
+		terms.append(t)
+	return terms
+
+def is_matches_valid_format(matches):
+	for match in matches:
+		if len(match) != 4:
+			return False
+		if match[1] == '' and match[2] == '' and match[3] != '0':
+			return False
+		# if match[1] == '' or match[2] == '' and match[3] != '0'
+			# return False
+	return True
 
 error_usage = "Usage: computor.py [EQUATION STRING]"
 error_format = "Error: Equation not well formated"
@@ -63,28 +84,30 @@ equation = equation.split('=')
 if len(equation) != 2:
 	put_error(error_format)
 	exit(0)
-leftside = equation[0]
-rightside = equation[1]
-
-# m = re.match('X\^[\d]', leftside)
-leftside = leftside.replace(" ", "")
-print(leftside)
+leftside = equation[0].replace(" ", "")
+rightside = equation[1].replace(" ", "")
 # m = re.search("((?P<coef>[+-]?\d+\.?\d*)\*X\^(?P<deg>\d+))+", leftside)
-m = re.search("((?P<coef>[+-]?\d+\.?\d*)\*[Xx](?P<deg>\^?\d+)*)", leftside)
-# m = re.search("(\d+(\.\d+)?)", leftside)
-if m:
-	print(m.groups())
+regex = "((?P<coef>[+-]?\d+\.?\d*)?\*?[Xx]\^?(?P<deg>\d+)*)|(0)"
+leftside = re.findall(regex, leftside)
+rightside = re.findall(regex, rightside)
+
+if leftside and rightside and is_matches_valid_format(leftside) and is_matches_valid_format(rightside):
+	leftside = fill_terms(leftside)
+	rightside = fill_terms(rightside)
 else:
-	print("No match")
-# print(leftside, '  ||||||  ', rightside)
+	put_error(error_format)
+	exit(0)
+
+print('leftside')
+for term in leftside:
+	print(term.coef, '^', term.deg)
+
+
+print('rightside')
+for term in rightside:
+	print(term.coef, '^', term.deg)
 
 # ret = solve_poly2(9, 2, 1)
 # print(isinstance(ret[0], Complex))
 
-
-# check_equation_format(equation)
-# print("argv> ", equation, "\nargc> ", argc)
-
-# txt = "The rain in Spain ai"
-# x = re.search("ai", txt)
-# print(x.string)
+# test 0 | test negative coef
