@@ -125,12 +125,6 @@ def simplify_equation(leftside, rightside):
 	simplified = [ Term(0, 0, True), Term(0, 1, True), Term(0, 2, True) ]
 	poly_degree = 0
 	for term in leftside:
-		# if term.coef == 0:
-		# 	simplified[0].hide_exponent = False
-		# 	simplified[1].hide_exponent = False
-		# 	simplified[2].hide_exponent = False
-		# 	continue
-		# else:
 		if term.deg == 0:
 			simplified[0].add(term)
 			simplified[0].hide_exponent = False
@@ -142,7 +136,6 @@ def simplify_equation(leftside, rightside):
 		elif term.deg == 2:
 			simplified[2].add(term)
 			simplified[2].hide_exponent = False
-			print('passed----')
 			poly_degree = max(term.deg, poly_degree)
 		elif term.deg > 2: # degree cannot solve
 			poly_degree = max(term.deg, poly_degree)
@@ -154,7 +147,6 @@ def simplify_equation(leftside, rightside):
 			else:
 				term.hide_exponent = False
 				simplified.append(term)
-	# filter coef == 0 from simplified
 	return (simplified, rightside, poly_degree)
 
 def solve_equation(leftside, rightside, poly_degree):
@@ -166,14 +158,14 @@ def solve_equation(leftside, rightside, poly_degree):
 	if poly_degree == 2:
 		solution = solve_poly2(leftside[2].coef, leftside[1].coef, leftside[0].coef)
 		if isinstance(solution, float) or isinstance(solution, int):
-			print('Discriminant is strictly positive is null, the solution is:', solution)
+			print('Discriminant is strictly positive is null, the solution is:\n', solution)
 		elif isinstance(solution[0], float) or isinstance(solution[0], int):
-			print('Discriminant is strictly positive, the two solutions are:',
-			solution[0],
-			solution[1])
+			print('Discriminant is strictly positive, the two solutions are:')
+			print(solution[0])
+			print(solution[1])
 		elif isinstance(solution[0], Complex):
-			print('Discriminant is strictly negative, the two solutions are:',
-			"{} {} {} i".format(solution[0].r, '-' if solution[0].i < 0 else '+', abs(solution[0].i)),
+			print('Discriminant is strictly negative, the two solutions are:\n'
+			"{} {} {} i\n".format(solution[0].r, '-' if solution[0].i < 0 else '+', abs(solution[0].i)),
 			"{} {} {} i".format(solution[1].r, '-' if solution[1].i < 0 else '+', abs(solution[1].i)))
 	if poly_degree == 1:
 		zero_term = leftside[0]
@@ -182,7 +174,7 @@ def solve_equation(leftside, rightside, poly_degree):
 			print(no_solutions)
 		elif one_term.coef == 0 and zero_term.coef == 0: # 0 == 0
 			print(all_real_numbers)
-		elif one_term.coef != 0 and zero_term.coef == 0:
+		elif one_term.coef != 0:# and zero_term.coef == 0:
 			solution = -1 * zero_term.coef / one_term.coef
 			print('The solution is:', solution)	
 	if poly_degree == 0:
