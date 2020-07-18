@@ -61,20 +61,20 @@ def fill_terms(matches):
 	terms = []
 	for match in matches:
 		if match[3] != '': # case 2 => deg 0 => 2 * X^0
-			coef = aton(match[3])
+			coef = float(match[3])
 			deg = 0
 		elif match[1] == '' and match[2] != '': # case X^3 => coef 1 => 1 * X^3
 			coef = 1
-			deg = aton(match[2])
+			deg = float(match[2])
 		# elif match[1] != '' and match[2] == '':
 		# 	coef = aton(match[1])
 		# 	deg = 0
 		elif match[1] != '' and match[2] == '': # case 6 * X => coef 6 deg 1 => 6 * X^1
-			coef = aton(match[1])
+			coef = float(match[1])
 			deg = 1
 		else:
-			coef = aton(match[1])
-			deg = aton(match[2])
+			coef = float(match[1])
+			deg = float(match[2])
 		t = Term(coef, deg)
 		terms.append(t)
 	return terms
@@ -96,12 +96,12 @@ def print_equation_side(equ):
 			if equ[i].hide_exponent:
 				print(equ[i].coef, end = " ")
 			else:
-				print("{} * X^{}".format(equ[i].coef, equ[i].deg), end = " ")
+				print("{} * X^{:.0f}".format(equ[i].coef, equ[i].deg), end = " ")
 		else:
 			if equ[i].hide_exponent:
 				print("{} {}".format('-' if equ[i].coef < 0 else '+', abs(equ[i].coef)), end = " ")
 			else:
-				print("{} {} * X^{}".format('-' if equ[i].coef < 0 else '+', abs(equ[i].coef), equ[i].deg), end = " ")
+				print("{} {} * X^{:.0f}".format('-' if equ[i].coef < 0 else '+', abs(equ[i].coef), equ[i].deg), end = " ")
 
 def print_equation(leftside, rightside, prefix = ""):
 	if prefix:
@@ -149,6 +149,9 @@ def simplify_equation(leftside, rightside):
 				simplified.append(term)
 	return (simplified, rightside, poly_degree)
 
+def pick_precision(num):
+	return 0 if num.is_integer() else 4
+
 def solve_equation(leftside, rightside, poly_degree):
 	no_solutions = 'There are no solutions !'
 	all_real_numbers = 'The solution: all real numbers'
@@ -157,16 +160,19 @@ def solve_equation(leftside, rightside, poly_degree):
 		return
 	if poly_degree == 2:
 		solution = solve_poly2(leftside[2].coef, leftside[1].coef, leftside[0].coef)
-		if isinstance(solution, float) or isinstance(solution, int):
-			print('Discriminant is strictly positive is null, the solution is:\n', solution)
-		elif isinstance(solution[0], float) or isinstance(solution[0], int):
+		if isinstance(solution, float):# or isinstance(solution, int):
+			print('Discriminant is strictly positive is null, the solution is:')
+			print("{0:.{1}f}".format(solution, pick_precision(solution)))
+		elif isinstance(solution[0], float):# or isinstance(solution[0], int):
 			print('Discriminant is strictly positive, the two solutions are:')
-			print(solution[0])
-			print(solution[1])
+			print("{0:.{1}f}".format(solution[0], pick_precision(solution[0])))
+			print("{0:.{1}f}".format(solution[1], pick_precision(solution[1])))
 		elif isinstance(solution[0], Complex):
 			print('Discriminant is strictly negative, the two solutions are:\n'
-			"{} {} {} i\n".format(solution[0].r, '-' if solution[0].i < 0 else '+', abs(solution[0].i)),
-			"{} {} {} i".format(solution[1].r, '-' if solution[1].i < 0 else '+', abs(solution[1].i)))
+			"{0:.{1}f} {2} {3:.{4}f} i\n".format(solution[0].r, pick_precision(solution[0].r),
+			'-' if solution[0].i < 0 else '+', abs(solution[0].i), pick_precision(solution[0].i)),
+			"{0:.{1}f} {2} {3:.{4}f} i".format(solution[1].r, pick_precision(solution[1].r),
+			'-' if solution[1].i < 0 else '+', abs(solution[1].i), pick_precision(solution[1].i)))
 	if poly_degree == 1:
 		zero_term = leftside[0]
 		one_term = leftside[1]
