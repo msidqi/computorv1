@@ -3,15 +3,28 @@ import sys
 import math
 
 class Term:
-	def __init__(self, coefficient, degree, hide_exponent = False):
+	def __init__(self, coefficient, degree, hide_exponent = False, hide_term = False):
 		self.deg = degree
 		self.coef = coefficient
 		self.hide_exponent = hide_exponent
+		self.hide_term = hide_term
 
 	def add(self, other_term):
 		if self.deg != other_term.deg:
 			raise Exception("Error::Term: Cannot add terms with different exponents")
 		self.coef += other_term.coef
+		self.update_hide_state()
+
+	def update_hide_state(self):
+		if self.coef == 0:
+			self.hide_exponent = True
+			self.hide_term = True
+		else:
+			if self.deg != 0:
+				self.hide_exponent = False
+			else:
+				self.hide_exponent = True
+			self.hide_term = False
 
 class Complex:
 	def __init__(self, real, imaginary):
@@ -90,7 +103,10 @@ def is_matches_valid_format(matches):
 def print_equation_side(equ):
 	length = len(equ)
 	for i in range(length):
-		if equ[i].hide_exponent and i <= 2 and i >= 0 and length > 1:
+		# if equ[i].hide_exponent and i <= 2 and i >= 0 and length > 1 and equ[i].coef == 0: # hide defaults that are 0
+		# 	continue
+		# print('equ[i].hide_term', equ[i].hide_term)
+		if equ[i].hide_term:
 			continue
 		if i == 0:
 			if equ[i].hide_exponent:
@@ -120,33 +136,32 @@ def simplify_equation(leftside, rightside):
 		term.coef *= -1
 		leftside.append(term)
 	# replace right with 0
-	rightside = [Term(0, 0, True)]
+	rightside = [Term(0, 0, True, False)]
 	# simplify
-	simplified = [ Term(0, 0, True), Term(0, 1, True), Term(0, 2, True) ]
-	poly_degree = 0
+	simplified = [ Term(0, 0, True, True), Term(0, 1, True, True), Term(0, 2, True, True) ]
 	for term in leftside:
+		# print('term.coef', term.coef, 'term.deg', term.deg)
+		if term.coef == 0:
+			continue
 		if term.deg == 0:
 			simplified[0].add(term)
-			simplified[0].hide_exponent = False
-			poly_degree = max(term.deg, poly_degree)
 		elif term.deg == 1:
 			simplified[1].add(term)
-			simplified[1].hide_exponent = False
-			poly_degree = max(term.deg, poly_degree)
 		elif term.deg == 2:
 			simplified[2].add(term)
-			simplified[2].hide_exponent = False
-			poly_degree = max(term.deg, poly_degree)
 		elif term.deg > 2: # degree cannot solve
-			poly_degree = max(term.deg, poly_degree)
-			for s in simplified:
-				if s.deg == term.deg:
-					s.add(term)
-					s.hide_exponent = False
+			for simp in simplified:
+				if simp.deg == term.deg:
+					simp.add(term)
 					break
 			else:
-				term.hide_exponent = False
+				term.update_hide_state()
 				simplified.append(term)
+	poly_degree = 0
+	for simp in simplified:
+		# print('coef', simp.coef, 'deg', simp.deg)
+		if simp.coef != 0:
+			poly_degree = max(simp.deg, poly_degree)
 	return (simplified, rightside, poly_degree)
 
 def pick_precision(num):
@@ -157,8 +172,7 @@ def solve_equation(leftside, rightside, poly_degree):
 	all_real_numbers = 'The solution: all real numbers'
 	if poly_degree > 2:
 		print("The polynomial degree is stricly greater than 2, I can't solve.")
-		return
-	if poly_degree == 2:
+	elif poly_degree == 2:# and leftside[2].coef != 0:
 		solution = solve_poly2(leftside[2].coef, leftside[1].coef, leftside[0].coef)
 		if isinstance(solution, float):# or isinstance(solution, int):
 			print('Discriminant is strictly positive is null, the solution is:')
@@ -173,7 +187,7 @@ def solve_equation(leftside, rightside, poly_degree):
 			'-' if solution[0].i < 0 else '+', abs(solution[0].i), pick_precision(solution[0].i)),
 			"{0:.{1}f} {2} {3:.{4}f} i".format(solution[1].r, pick_precision(solution[1].r),
 			'-' if solution[1].i < 0 else '+', abs(solution[1].i), pick_precision(solution[1].i)))
-	if poly_degree == 1:
+	elif poly_degree == 1:
 		zero_term = leftside[0]
 		one_term = leftside[1]
 		if one_term.coef == 0 and zero_term.coef != 0: # 1 == 0
@@ -183,7 +197,7 @@ def solve_equation(leftside, rightside, poly_degree):
 		elif one_term.coef != 0:# and zero_term.coef == 0:
 			solution = -1 * zero_term.coef / one_term.coef
 			print('The solution is:', solution)	
-	if poly_degree == 0:
+	elif poly_degree == 0:
 		zero_term = leftside[0]
 		if zero_term.coef != 0:
 			print(no_solutions)
@@ -194,44 +208,52 @@ def solve_equation(leftside, rightside, poly_degree):
 		# 		print(no_solutions)
 		# 		break
 
-error_usage = "Usage: computor.py [EQUATION STRING]"
-error_format = "Error: Equation not well formated"
+def parse_equation(equation_string):
+	error_format = "Error: Equation not well formated"
+	equation = equation_string.split('=')
+	if len(equation) != 2:
+		raise Exception(error_format)
+	leftside = equation[0].replace(" ", "")
+	rightside = equation[1].replace(" ", "")
 
-argc = len(sys.argv)
-if argc < 2:
-	put_error(error_usage)
-	exit(0)
-equation = sys.argv[1]
-equation = equation.split('=')
-if len(equation) != 2:
-	put_error(error_format)
-	exit(0)
-leftside = equation[0].replace(" ", "")
-rightside = equation[1].replace(" ", "")
+	regex = "((?P<coef>[+-]?\d+\.?\d*)?\*?[Xx]\^?(?P<deg>\d+)*)|([+-]?\d+\.?\d*)"
+	leftside = re.findall(regex, leftside)
+	rightside = re.findall(regex, rightside)
+	if not is_matches_valid_format(leftside) or not is_matches_valid_format(rightside):
+		raise Exception(error_format)
+	return (leftside, rightside)
 
-regex = "((?P<coef>[+-]?\d+\.?\d*)?\*?[Xx]\^?(?P<deg>\d+)*)|([+-]?\d+\.?\d*)"
-leftside = re.findall(regex, leftside)
-rightside = re.findall(regex, rightside)
 
-# print(leftside, rightside)
-if leftside and rightside and is_matches_valid_format(leftside) and is_matches_valid_format(rightside):
+# intro
+def main(argv):
+	error_usage = "Usage: computor.py [EQUATION STRING]"
+	argc = len(argv)
+	if argc < 2:
+		put_error(error_usage)
+		exit(0)
+	equation_string = argv[1]
+
+	try:
+		leftside, rightside = parse_equation(equation_string)
+	except Exception as format_error:
+		put_error(format_error)
+		exit(0)
+
+	# transform matches to lists of Term class 
 	leftside = fill_terms(leftside)
 	rightside = fill_terms(rightside)
-else:
-	put_error(error_format)
-	exit(0)
 
-# simplify
-leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
+	# simplify
+	leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
 
-for simp in leftside:
-	print(simp.coef, simp.deg)
+	# for simp in leftside:
+	# 	print(simp.coef, simp.deg)
 
-print_equation(leftside, rightside, 'Reduced form:')
-print_poly_degree(poly_degree)
-solve_equation(leftside, rightside, poly_degree)
+	print_equation(leftside, rightside, 'Reduced form:')
+	print_poly_degree(poly_degree)
+	solve_equation(leftside, rightside, poly_degree)
 
-# ret = solve_poly2(9, 2, 1)
-# print(isinstance(ret[0], Complex))
+	# test 0 | test negative coef
 
-# test 0 | test negative coef
+if __name__ == "__main__":
+	main(sys.argv)
