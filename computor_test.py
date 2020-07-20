@@ -8,6 +8,7 @@ class TestEquationSolver(unittest.TestCase):
 		expect_rightside = [('1*X^0', '1', '0', '')]
 		self.assertEqual(leftside, expect_leftside)
 		self.assertEqual(rightside, expect_rightside)
+
 		# make list of terms
 		leftside = fill_terms(leftside)
 		rightside = fill_terms(rightside)
@@ -19,7 +20,7 @@ class TestEquationSolver(unittest.TestCase):
 		#simplify equation
 		leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
 		expect_poly_degree = 2
-		expect_leftside = [Term(4, 0), Term(4, 1), Term(-9.3, 2)]
+		expect_leftside = [Term(4, 0, True, False), Term(4, 1), Term(-9.3, 2)]
 		expect_rightside = [Term(0, 0, True, False)]
 		self.assertEqual(poly_degree, expect_poly_degree)
 		self.assertEquationSideEquals(leftside, expect_leftside)
@@ -44,7 +45,7 @@ class TestEquationSolver(unittest.TestCase):
 		#simplify equation
 		leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
 		expect_poly_degree = 1
-		expect_leftside = [Term(1, 0), Term(4, 1), Term(0, 2)]
+		expect_leftside = [Term(1, 0, True, False), Term(4, 1), Term(0, 2, True, True)]
 		expect_rightside = [Term(0, 0, True, False)]
 		self.assertEqual(poly_degree, expect_poly_degree)
 		self.assertEquationSideEquals(leftside, expect_leftside)
@@ -70,7 +71,7 @@ class TestEquationSolver(unittest.TestCase):
 		#simplify equation
 		leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
 		expect_poly_degree = 1
-		expect_leftside = [Term(5, 0), Term(4, 1), Term(0, 2)]
+		expect_leftside = [Term(5, 0, True, False), Term(4, 1), Term(0, 2, True, True)]
 		expect_rightside = [Term(0, 0, True, False)]
 		self.assertEqual(poly_degree, expect_poly_degree)
 		self.assertEquationSideEquals(leftside, expect_leftside)
@@ -83,6 +84,8 @@ class TestEquationSolver(unittest.TestCase):
 	def assertTermsEqual(self, term, expect_term):
 		self.assertEqual(term.deg, expect_term.deg)
 		self.assertEqual(term.coef, expect_term.coef)
+		self.assertEqual(term.hide_exponent, expect_term.hide_exponent)
+		self.assertEqual(term.hide_term, expect_term.hide_term)
 	
 	def assertEquationSideEquals(self, side, expect_side):
 		# same length

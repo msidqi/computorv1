@@ -140,7 +140,6 @@ def simplify_equation(leftside, rightside):
 	# simplify
 	simplified = [ Term(0, 0, True, True), Term(0, 1, True, True), Term(0, 2, True, True) ]
 	for term in leftside:
-		# print('term.coef', term.coef, 'term.deg', term.deg)
 		if term.coef == 0:
 			continue
 		if term.deg == 0:
@@ -159,7 +158,6 @@ def simplify_equation(leftside, rightside):
 				simplified.append(term)
 	poly_degree = 0
 	for simp in simplified:
-		# print('coef', simp.coef, 'deg', simp.deg)
 		if simp.coef != 0:
 			poly_degree = max(simp.deg, poly_degree)
 	return (simplified, rightside, poly_degree)
