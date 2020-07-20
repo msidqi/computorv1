@@ -2,6 +2,78 @@ import unittest
 from computor import main, parse_equation, fill_terms, simplify_equation, solve_equation, Term, Complex
 
 class TestEquationSolver(unittest.TestCase):
+	def test_5th_degree(self):
+		leftside, rightside = parse_equation("x^5-7x+12=2")
+		expect_leftside = [('x^5', '', '5', ''), ('-7x', '-7', '', ''), ('', '', '', '+12')]
+		expect_rightside = [('', '', '', '2')]
+		self.assertEqual(leftside, expect_leftside)
+		self.assertEqual(rightside, expect_rightside)
+
+		# make list of terms
+		leftside = fill_terms(leftside)
+		rightside = fill_terms(rightside)
+		expect_leftside = [Term(1, 5), Term(-7, 1), Term(12, 0)]
+		expect_rightside = [Term(2, 0)]
+		self.assertEquationSideEquals(leftside, expect_leftside)
+		self.assertEquationSideEquals(rightside, expect_rightside)
+
+		#simplify equation
+		leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
+		expect_poly_degree = 5
+		expect_leftside = [Term(10, 0, True, False), Term(-7, 1), Term(0, 2, True, True), Term(1, 5)]
+		expect_rightside = [Term(0, 0, True, False)]
+		self.assertEqual(poly_degree, expect_poly_degree)
+		self.assertEquationSideEquals(leftside, expect_leftside)
+		self.assertEquationSideEquals(rightside, expect_rightside)
+
+	def test_2nd_degree_negative_disc(self):
+		leftside, rightside = parse_equation("9*x^2+2x+1=0")
+		expect_leftside = [('9*x^2', '9', '2', ''), ('+2x', '+2', '', ''), ('', '', '', '+1')]
+		expect_rightside = [('', '', '', '0')]
+		self.assertEqual(leftside, expect_leftside)
+		self.assertEqual(rightside, expect_rightside)
+
+		# make list of terms
+		leftside = fill_terms(leftside)
+		rightside = fill_terms(rightside)
+		expect_leftside = [Term(9, 2), Term(2, 1), Term(1, 0)]
+		expect_rightside = [Term(0, 0)]
+		self.assertEquationSideEquals(leftside, expect_leftside)
+		self.assertEquationSideEquals(rightside, expect_rightside)
+
+		#simplify equation
+		leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
+		expect_poly_degree = 2
+		expect_leftside = [Term(1, 0, True, False), Term(2, 1), Term(9, 2)]
+		expect_rightside = [Term(0, 0, True, False)]
+		self.assertEqual(poly_degree, expect_poly_degree)
+		self.assertEquationSideEquals(leftside, expect_leftside)
+		self.assertEquationSideEquals(rightside, expect_rightside)
+
+	def test_2nd_degree_positive_disc_natural_format(self):
+		leftside, rightside = parse_equation("x^2-7x+12=2")
+		expect_leftside = [('x^2', '', '2', ''), ('-7x', '-7', '', ''), ('', '', '', '+12')]
+		expect_rightside = [('', '', '', '2')]
+		self.assertEqual(leftside, expect_leftside)
+		self.assertEqual(rightside, expect_rightside)
+
+		# make list of terms
+		leftside = fill_terms(leftside)
+		rightside = fill_terms(rightside)
+		expect_leftside = [Term(1, 2), Term(-7, 1), Term(12, 0)]
+		expect_rightside = [Term(2, 0)]
+		self.assertEquationSideEquals(leftside, expect_leftside)
+		self.assertEquationSideEquals(rightside, expect_rightside)
+
+		#simplify equation
+		leftside, rightside, poly_degree = simplify_equation(leftside, rightside)
+		expect_poly_degree = 2
+		expect_leftside = [Term(10, 0, True, False), Term(-7, 1), Term(1, 2)]
+		expect_rightside = [Term(0, 0, True, False)]
+		self.assertEqual(poly_degree, expect_poly_degree)
+		self.assertEquationSideEquals(leftside, expect_leftside)
+		self.assertEquationSideEquals(rightside, expect_rightside)
+
 	def test_2nd_degree_positive_disc(self):
 		leftside, rightside = parse_equation("5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0")
 		expect_leftside = [('5*X^0', '5', '0', ''), ('+4*X^1', '+4', '1', ''), ('-9.3*X^2', '-9.3', '2', '')]
@@ -25,7 +97,6 @@ class TestEquationSolver(unittest.TestCase):
 		self.assertEqual(poly_degree, expect_poly_degree)
 		self.assertEquationSideEquals(leftside, expect_leftside)
 		self.assertEquationSideEquals(rightside, expect_rightside)
-
 
 	def test_1st_degree_long_format(self):
 		leftside, rightside = parse_equation("5 * X^0 + 4 * X^1 = 4 * X^0")
@@ -51,11 +122,10 @@ class TestEquationSolver(unittest.TestCase):
 		self.assertEquationSideEquals(leftside, expect_leftside)
 		self.assertEquationSideEquals(rightside, expect_rightside)
 
-
 	def test_1st_degree_natural_format(self):
-		leftside, rightside = parse_equation("5 + 4 * X + X^2 = X^2")
+		leftside, rightside = parse_equation("5 + 4 * X + X^2 = X2")
 		expect_leftside = [('', '', '', '5'), ('+4*X', '+4', '', ''), ('X^2', '', '2', '')]
-		expect_rightside = [('X^2', '', '2', '')]
+		expect_rightside = [('X2', '', '2', '')]
 		# same parsed values
 		self.assertEqual(leftside, expect_leftside)
 		self.assertEqual(rightside, expect_rightside)

@@ -181,9 +181,9 @@ def solve_equation(leftside, rightside, poly_degree):
 			print("{0:.{1}f}".format(solution[1], pick_precision(solution[1])))
 		elif isinstance(solution[0], Complex):
 			print('Discriminant is strictly negative, the two solutions are:\n'
-			"{0:.{1}f} {2} {3:.{4}f} i\n".format(solution[0].r, pick_precision(solution[0].r),
+			" {0:.{1}f} {2} {3:.{4}f}i\n".format(solution[0].r, pick_precision(solution[0].r),
 			'-' if solution[0].i < 0 else '+', abs(solution[0].i), pick_precision(solution[0].i)),
-			"{0:.{1}f} {2} {3:.{4}f} i".format(solution[1].r, pick_precision(solution[1].r),
+			"{0:.{1}f} {2} {3:.{4}f}i".format(solution[1].r, pick_precision(solution[1].r),
 			'-' if solution[1].i < 0 else '+', abs(solution[1].i), pick_precision(solution[1].i)))
 	elif poly_degree == 1:
 		zero_term = leftside[0]
