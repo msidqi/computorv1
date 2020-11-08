@@ -1,6 +1,5 @@
 import re
 import sys
-import math
 
 class Term:
 	def __init__(self, coefficient, degree, hide_exponent = False, hide_term = False):
@@ -36,6 +35,27 @@ def abs(n):
 		return (-n)
 	return n
 
+def sqrt(number, precision = 5):
+	start = 0
+	end = number
+	while start <= end:
+		mid = (start + end) / 2
+		if mid * mid == number:
+			result = mid
+			break
+		if mid * mid < number:
+			start = mid + 1
+			result = mid
+		else:
+			end = mid - 1
+	increment = 0.1
+	for i in range(0, precision):
+		while result * result <= number:
+			result += increment
+		result = result - increment
+		increment = increment / 10
+	return result
+
 def pow(a, exponent):
 	if exponent == 0:
 		return 1
@@ -51,7 +71,7 @@ def solve_poly2(a, b, c):
 	discr = b * b - 4 * a * c
 	if discr == 0:
 		return (-b / (2 * a))
-	squareDisc = math.sqrt(abs(discr))
+	squareDisc = sqrt(abs(discr))
 	if discr < 0:
 		return (
 			Complex(-b / (2 * a), squareDisc / (2 * a)),
@@ -159,7 +179,7 @@ def simplify_equation(leftside, rightside):
 	poly_degree = 0
 	for simp in simplified:
 		if simp.coef != 0:
-			poly_degree = max(simp.deg, poly_degree)
+			poly_degree = int(max(simp.deg, poly_degree))
 	return (simplified, rightside, poly_degree)
 
 def pick_precision(num):
